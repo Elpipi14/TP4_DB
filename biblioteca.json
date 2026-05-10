@@ -1,0 +1,134 @@
+use biblioteca
+
+db.createCollection("libros", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["titulo", "autor", "isbn", "anioPublicacion", "disponible", "categorias"],
+      properties: {
+        titulo: { bsonType: "string" },
+        autor: { bsonType: "string" },
+        isbn: {
+          bsonType: "string",
+          pattern: "^[0-9]{3}-[0-9]{10}$"
+        },
+        anioPublicacion: {
+          bsonType: "int",
+          minimum: 1900,
+          maximum: 2025
+        },
+        disponible: { bsonType: "bool" },
+        categorias: {
+          bsonType: "array",
+          minItems: 1,
+          items: { bsonType: "string" }
+        }
+      }
+    }
+  }
+})
+
+db.createCollection("prestamos")
+
+db.libros.insertMany([
+  {
+    titulo: "Clean Code",
+    autor: "Robert C. Martin",
+    isbn: "978-0132350884",
+    anioPublicacion: 2008,
+    disponible: true,
+    categorias: ["Programación", "Software"]
+  },
+  {
+    titulo: "El Principito",
+    autor: "Antoine de Saint-Exupéry",
+    isbn: "978-0156012195",
+    anioPublicacion: 1943,
+    disponible: true,
+    categorias: ["Literatura"]
+  },
+  {
+    titulo: "1984",
+    autor: "George Orwell",
+    isbn: "978-0451524935",
+    anioPublicacion: 1949,
+    disponible: false,
+    categorias: ["Novela", "Distopía"]
+  },
+  {
+    titulo: "MongoDB Básico",
+    autor: "Juan Pérez",
+    isbn: "978-1234567890",
+    anioPublicacion: 2022,
+    disponible: true,
+    categorias: ["Base de Datos", "NoSQL"]
+  },
+  {
+    titulo: "Java desde Cero",
+    autor: "Ana Gómez",
+    isbn: "978-9876543210",
+    anioPublicacion: 2020,
+    disponible: true,
+    categorias: ["Programación", "Java"]
+  }
+])
+
+db.prestamos.insertMany([
+  {
+    libro: {
+      titulo: "1984",
+      isbn: "978-0451524935"
+    },
+    usuario: {
+      nombre: "Carlos López",
+      email: "carlos@email.com"
+    },
+    fechaPrestamo: new Date("2025-03-01"),
+    fechaDevolucion: new Date("2025-03-15"),
+    estado: "retrasado"
+  },
+  {
+    libro: {
+      titulo: "Clean Code",
+      isbn: "978-0132350884"
+    },
+    usuario: {
+      nombre: "María Torres",
+      email: "maria@email.com"
+    },
+    fechaPrestamo: new Date("2025-04-01"),
+    fechaDevolucion: new Date("2025-04-15"),
+    estado: "activo"
+  },
+  {
+    libro: {
+      titulo: "El Principito",
+      isbn: "978-0156012195"
+    },
+    usuario: {
+      nombre: "Lucas Fernández",
+      email: "lucas@email.com"
+    },
+    fechaPrestamo: new Date("2025-02-10"),
+    fechaDevolucion: new Date("2025-02-20"),
+    estado: "devuelto"
+  }
+])
+
+db.libros.find({ disponible: true })
+
+db.prestamos.updateOne(
+  { "libro.isbn": "978-0132350884" },
+  { $set: { estado: "devuelto" } }
+)
+
+db.prestamos.find({ estado: "retrasado" })
+
+db.libros.updateOne(
+  { isbn: "978-1234567890" },
+  { $addToSet: { categorias: "Backend" } }
+)
+
+db.libros.find()
+
+db.prestamos.find()
